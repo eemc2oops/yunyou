@@ -1,3 +1,4 @@
 ﻿log/
 __pycache__/
+project/
 geckodriver.log

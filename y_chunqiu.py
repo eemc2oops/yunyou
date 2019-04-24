@@ -145,7 +145,7 @@ class chunqiu_air:
     def test(self):
         #self._city_list()
         #self.show_city_list()
-        self.tickets('武汉', '东京') 
+        self.tickets('上海', '东京') 
 
 def run_entry():
 

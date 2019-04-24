@@ -91,8 +91,8 @@ class chunqiu_air:
             'IfRet' : 'false',
             'IsShowTaxprice' : 'true',
             'IsUM' : 'false',
-            #'Days' : '61',
-            'Days' : '5',
+            'Days' : '61',
+            #'Days' : '3',
         }
         
         url = 'https://flights.ch.com/Flights/MinPriceTrends'
@@ -118,15 +118,29 @@ class chunqiu_air:
         #browser.close()
         #print(unquote(url))
         r = requests.post(url, headers = headers, data = data)
+        if r.status_code != requests.codes.ok:
+            w2l.error('{0} url {1} return {2}'.format(type(self), url, r.status_code))
+            return
         #print(r.cookies)
         #for key, value in r.cookies.items():
         #    print(key + ' = ' + value)
-        print(r.text)
+        #{"PriceTrends":[{"Date":"2019-04-24","DayOfWeek":"周三","Price":null,"ActPrice":null,"ActId":null},{"Date":"2019-04-25","DayOfWeek":"周四","Price":null,"ActPrice":null,"ActId":null},{"Date":"2019-04-26","DayOfWeek":"周五","Price":null,"ActPrice":null,"ActId":null}],"IsInternational":true,"IsShowTaxprice":true,"Code":"0","ErrorMessage":null,"Key":null}
+        tickets_info = json.loads(r.text)
+        if tickets_info['Code'] != '0' or tickets_info['ErrorMessage'] is not None:
+            w2l.error('{0} url {1} return {2} {3}'.format(type(self), url, tickets_info['Code'], tickets_info['ErrorMessage']))
+            return
+
+        for item in tickets_info['PriceTrends']:
+            if item['Price'] is not None:
+                #{'Date': '2019-04-27', 'DayOfWeek': '周六', 'Price': 2160, 'ActPrice': None, 'ActId': None}
+                yield item
+        #print(r.text)
 
     def tickets(self, city_from, city_to):
         for city1 in self._get_airport(city_from):
             for city2 in self._get_airport(city_to):
-                self._tickets(city1['code'], city2['code'])
+                for info in self._tickets(city1['code'], city2['code']):
+                    print('{} to {} at {},{}  price {}'.format(city1['chs'], city2['chs'], info['Date'], info['DayOfWeek'], info['Price']))
 
     def test(self):
         #self._city_list()

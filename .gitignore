@@ -1,4 +1,5 @@
 ﻿log/
 __pycache__/
 project/
+.vscode/
 geckodriver.log

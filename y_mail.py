@@ -70,12 +70,13 @@ def run_entry():
     #w2l.info("{0} run.".format(__name__))
     print("{0} run.".format(__name__))
 
-    yemail = y_status_email()
+    yemail = y_status_email('测试')
     yemail.send_msg('测试邮件模块，请忽略本邮件')
 
 def module_entry():
     #w2l.info("{0} module run.".format(__name__))
-    print("{0} module run.".format(__name__))
+    #print("{0} module run.".format(__name__))
+    pass
 
 if __name__ == "__main__":
     run_entry()

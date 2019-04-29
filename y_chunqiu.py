@@ -299,6 +299,14 @@ class chunqiu_air(y_co_if.air_if):
                         yield tick
     
     def gettickets(self, city_from, city_to):
+        from_list = []
+        to_list = []
+        
+        for city1 in self._get_airport(city_from):
+            for city2 in self._get_airport(city_to):
+                from_list.append(city1)
+                to_list.append(city2)
+                
         ticketlist = []
 
         for ticket in self.tickets(city_from, city_to):

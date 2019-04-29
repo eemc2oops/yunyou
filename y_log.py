@@ -78,11 +78,11 @@ class clog(logging.Logger):
 
             self.logger.setLevel(logging.DEBUG)
 
-            file_fmt = logging.Formatter('%(name)-12s level(%(levelname)-8s) thread(%(thread)d)  %(asctime)s : %(message)s')
+            file_fmt = logging.Formatter('[ %(name)-12s, level(%(levelname)-8s), thread(%(thread)d),  %(asctime)s ] %(message)s')
             fh = logging.FileHandler(logfile)
             fh.setFormatter(file_fmt)
 
-            con_fmt = logging.Formatter('%(module)-12s  %(lineno)d  %(asctime)s : %(message)s')
+            con_fmt = logging.Formatter('[ %(levelname)-8s %(name)-12s, %(asctime)s ] %(message)s')
             ch = logging.StreamHandler(sys.stdout)
             ch.setFormatter(con_fmt)
 

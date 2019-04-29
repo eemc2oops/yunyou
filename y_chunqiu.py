@@ -10,13 +10,14 @@ import datetime
 from bs4 import BeautifulSoup
 from pyquery import PyQuery as pq
 
+import y_co_if
 import y_log
 
 w2l = y_log.clog(__name__ == "__main__")
 
 #time.strftime('%Y-%m-%d',time.localtime(time.time()))
 
-class chunqiu_air:
+class chunqiu_air(y_co_if.air_if):
     '''春秋'''
     def _get_city_list(self):
         url = 'https://ajax.springairlines.com/cache/js/modules/data/citydict-zh-cn.js?vs=v2019041921'
@@ -75,9 +76,9 @@ class chunqiu_air:
 
     def _get_query_param(self, date, airport_from, airport_to):
         data = {
-            'Departure' : '上海',
-            'Arrival' : '东京(羽田)',
-            'FDate' : '2019-04-28',
+            'Departure' : airport_from,
+            'Arrival' : airport_to,
+            'FDate' : date,
             'ANum' : 1,
             'CNum' : 0,
             'INum' : 0,
@@ -87,7 +88,7 @@ class chunqiu_air:
             'IsNew' : 1,
         }
         
-        url = 'https://flights.ch.com/SHA-HND.html'
+        url = 'https://flights.ch.com/{}-{}.html'.format(airport_from, airport_to)
         
         headers = {
             'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
@@ -103,9 +104,22 @@ class chunqiu_air:
         #print(soup)
         #print(soup.select)
         
+        #with open('file.txt', 'wt', encoding='utf-8') as f:
+        #    f.write(r.text)
+        
         doc = pq(r.text)
-        body = doc.children()
-        print(doc)
+        body = doc('html body')
+        #searchPara = body("#searchPara")
+        searchPara = body.children('div#searchPara')
+        #hasvalue = searchPara.children('input[name,value]')
+        hasvalue = searchPara.children('input[name][value]')
+        param = {}
+        for item in hasvalue.items():
+            param[item.attr('name')] = item.attr('value')
+            
+        #print(param)
+        
+        return param
         
 
     def _get_air_plane(self, date, airport_from, airport_to):
@@ -123,6 +137,7 @@ class chunqiu_air:
         DepartureDate: 2019-04-28
         IsIJFlight: false
         '''
+        param = self._get_query_param(date, airport_from, airport_to)
         data = {
             'Active9s' : None,
             'IsJC' : 'false',
@@ -137,16 +152,20 @@ class chunqiu_air:
             #'DepartureDate' : '2019-04-27',
             'ReturnDate' : 'null',
             #'IsIJFlight' : 'true',
-            'IsIJFlight' : 'false',
-            'IsBg' : 'false',
-            'IsEmployee' : 'false',
+            'IsIJFlight' : param['isIJFlight'],
+            #'IsBg' : 'false',
+            'IsBg' : param['isBg'],
+            #'IsEmployee' : 'false',
+            'IsEmployee' : param['isEmployee'],
             'IsLittleGroupFlight' : 'false',
             'SeatsNum' : 1,
             'ActId' : 0,
-            'IfRet' : 'false',
+            #'IfRet' : 'false',
+            'IfRet' : param['ifRet'],
             'IsUM' : 'false',
             'CabinActId' : 'null',
-            'isdisplayold' : 'false',
+            #'isdisplayold' : 'false',
+            'isdisplayold' : param['isDisplayOld'],
         }
         
         url = 'https://flights.ch.com/Flights/SearchByTime'
@@ -182,8 +201,7 @@ class chunqiu_air:
                 }
                 yield plane
         
-
-    def _tickets(self, airport_from, airport_to):
+    def _ticketsbydate(self, date, airport_from, airport_to, days = 365):
         '''查询一年的数据'''
         data = {
             'Departure' : airport_from,
@@ -192,7 +210,7 @@ class chunqiu_air:
             'Currency' : 0,
             'SType' : 10,
             #'DepartureDate' : '2019-04-26',
-            'DepartureDate' : (datetime.date.today() + datetime.timedelta(days=173)).strftime('%Y-%m-%d'),
+            'DepartureDate' : date,
             'ReturnDate' : '',
             'IsIJFlight' : 'true',
             'IsBg' : 'false',
@@ -201,7 +219,21 @@ class chunqiu_air:
             'IfRet' : 'false',
             'IsShowTaxprice' : 'true',
             'IsUM' : 'false',
-            'Days' : 365,
+            'Days' : days,
+        }
+        data1 = {
+            'Currency' : 0,
+            'DepartureDate' : date,
+            'IsShowTaxprice' : 'true',
+            'Departure' : airport_from,
+            'Arrival' : airport_to,
+            'SType' : '10',
+            'IsIJFlight' : 'true',
+            'Days' : days,
+            'IfRet' : 'false',
+            'ActId' : 0,
+            'IsReturn' : 'false',
+            'IsUM' : 'false',
         }
         
         url = 'https://flights.ch.com/Flights/MinPriceTrends'
@@ -211,7 +243,7 @@ class chunqiu_air:
         }
         
         #print(unquote(url))
-        r = requests.post(url, headers = headers, data = data)
+        r = requests.post(url, headers = headers, data = data1)
         if r.status_code != requests.codes.ok:
             w2l.error('{0} url {1} return {2}  {3}'.format(type(self), url, r.status_code, date))
             return
@@ -226,9 +258,19 @@ class chunqiu_air:
             return
 
         for item in tickets_info['PriceTrends']:
-            if item['Price'] is not None:
+            if item['Price'] is not None and item['Price'] > 0:
                 #{'Date': '2019-04-27', 'DayOfWeek': '周六', 'Price': 2160, 'ActPrice': None, 'ActId': None}
+                print(item)
                 yield item
+                
+    def _tickets(self, airport_from, airport_to):
+        '''
+                                             查询一年的数据
+                                            春秋的查询接口是在指定时间的前后各查一半的数据
+                                            所以要查从明天起一年的数据，要从半年后开始查询
+        '''
+        for tick in self._ticketsbydate((datetime.date.today() + datetime.timedelta(days=173)).strftime('%Y-%m-%d'), airport_from, airport_to):
+            yield tick
 
     def tickets(self, city_from, city_to):
         for city1 in self._get_airport(city_from):
@@ -255,7 +297,44 @@ class chunqiu_air:
                         }
                         #print('{} to {} at {},{}  price {}'.format(city1['chs'], city2['chs'], info['Date'], info['DayOfWeek'], info['Price']))
                         yield tick
-                    
+    
+    def gettickets(self, city_from, city_to):
+        ticketlist = []
+
+        for ticket in self.tickets(city_from, city_to):
+            ticketlist.append(ticket)
+            
+        return ticketlist
+    
+    def ticketsbydate(self, date, city_from, city_to):
+        for city1 in self._get_airport(city_from):
+            for city2 in self._get_airport(city_to):
+                for info in self._ticketsbydate(date, city1['code'], city2['code'], days = 1):
+                    for plane in self._get_air_plane(info['Date'], city1['code'], city2['code']):
+                        if info['Price'] != plane['price']:
+                            w2l.debug('{}  from {} to {} date {} price {} {}'.format(type(self), city_from, city_to, info['Date'], info['Price'], plane['price']))
+                        tick = {
+                            'from' : city1['chs'],
+                            'to' : city2['chs'],
+                            'date' : info['Date'].replace('-', ''),
+                            'week' : info['DayOfWeek'],
+                            #'price' : info['Price'],
+                            'price' : plane['price'],
+                            'airtype' : plane['airtype'],          # 飞机型号
+                            'flytime' : plane['flytime'],   # 飞行时间
+                            'flyno' : plane['flyno'],     # 航班号
+                            'departuretime' : plane['departuretime'],     # 登机时间(当地时间)
+                            'arrivaltime' : plane['arrivaltime'],     # 到达时间(当地时间)
+                            'refer' : self.name,  # 查询来源
+                            'url' : self.url,  # 查询网站
+                            'airline' : '春秋航空',  # 机票航空公司
+                        }
+                        #print('{} to {} at {},{}  price {}'.format(city1['chs'], city2['chs'], info['Date'], info['DayOfWeek'], info['Price']))
+                        print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(tick['from'], tick['to'], tick['date'], tick['week'], tick['price'], tick['airtype'], tick['flytime'], tick['flyno'], tick['departuretime'], tick['arrivaltime'], tick['refer'], tick['url'], tick['airline']))
+                        #yield tick
+                        return tick
+    
+
     def _test(self, city_from, city_to):
         for ticket in self.tickets(city_from, city_to):
             print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(ticket['from'], ticket['to'], ticket['date'], ticket['week'], ticket['price'], ticket['airtype'], ticket['flytime'], ticket['flyno'], ticket['departuretime'], ticket['arrivaltime'], ticket['refer'], ticket['url'], ticket['airline']))
@@ -265,10 +344,13 @@ class chunqiu_air:
         #self.show_city_list()
         #self._test('上海', '东京')
         #self._test('武汉', '东京')
-        #self._test('武汉', '大坂')
+        #self._test('武汉', '大阪')
         #self._test('武汉', '香港')
+        self.ticketsbydate('2019-04-30', '武汉', '大阪')
+        self.ticketsbydate('2019-05-05', '武汉', '东京')
+        self.ticketsbydate('2019-05-07', '武汉', '大阪')
         #self._get_air_plane('2019-04-27', '武汉', '东京(成田)')
-        self._get_query_param('2019-04-27', '武汉', '东京(成田)')
+        #self._get_query_param('2019-05-27', 'SHA', 'HND')
 
 def run_entry():
 

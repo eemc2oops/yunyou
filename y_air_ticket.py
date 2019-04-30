@@ -1,4 +1,5 @@
-﻿from concurrent.futures import ThreadPoolExecutor
+﻿import time
+from concurrent.futures import ThreadPoolExecutor
 
 import y_log
 import y_chunqiu
@@ -20,15 +21,20 @@ class airticket:
 
     @staticmethod
     def _get_ticket(obj, city_from, city_to):
-        print(obj, city_from, city_to)
         return obj.gettickets(city_from, city_to)
 
     def tickets(self, city_from, city_to):
         from_list = []
         to_list = []
+
+        #print('begin ', time.strftime("%H:%M:%S"))
         #for intf in self.air_intf:
         #    for ticket in intf.tickets(city_from, city_to):
         #        yield ticket
+        #print('end ', time.strftime("%H:%M:%S"))
+        
+        
+        #print('begin ', time.strftime("%H:%M:%S"))
         for i in range(0, len(self.air_intf)):
             from_list.append(city_from)
             to_list.append(city_to)
@@ -36,16 +42,20 @@ class airticket:
         print(self.air_intf)
         print(from_list)
         print(to_list)
+        
         tickets_result = self.executor.map(airticket._get_ticket, self.air_intf, from_list, to_list)
 
         for tickets in tickets_result:
             for ticket in tickets:
                 yield ticket
+        
+        #print('end ', time.strftime("%H:%M:%S"))
 
     def test(self):
         #print(str(self.ch))
-        for ticket in self.tickets('武汉', '东京'):
-            print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(ticket['from'], ticket['to'], ticket['date'], ticket['week'], ticket['price'], ticket['airtype'], ticket['flytime'], ticket['flyno'], ticket['departuretime'], ticket['arrivaltime'], ticket['refer'], ticket['url'], ticket['airline']))
+        for ticket in self.tickets('上海', '东京'):
+            #print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(ticket['from'], ticket['to'], ticket['date'], ticket['week'], ticket['price'], ticket['airtype'], ticket['flytime'], ticket['flyno'], ticket['departuretime'], ticket['arrivaltime'], ticket['refer'], ticket['url'], ticket['airline']))
+            pass
 
 def run_entry():
     w2l.info('{0} run.'.format(__name__))

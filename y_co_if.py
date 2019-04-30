@@ -15,7 +15,7 @@ class air_if(object):
     @abstractmethod
     def gettickets(self, city_from, city_to):
         pass
-    
+    '''
     def _ticketsarray(self, airport_from, airport_to):
         ticketarray = []
         
@@ -23,10 +23,10 @@ class air_if(object):
             ticketarray.append(ticket)
             
         return ticketarray
-
+    
     def _gettickets(self, from_list, to_list):
         if len(from_list) == 1:
-
+    '''
     
 def run_entry():
     w2l.info('{} run.'.format(__name__))

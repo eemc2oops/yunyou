@@ -9,6 +9,7 @@ from selenium import webdriver
 import datetime
 from bs4 import BeautifulSoup
 from pyquery import PyQuery as pq
+from concurrent.futures import ThreadPoolExecutor
 
 import y_co_if
 import y_log
@@ -243,7 +244,7 @@ class chunqiu_air(y_co_if.air_if):
         }
         
         #print(unquote(url))
-        r = requests.post(url, headers = headers, data = data1)
+        r = requests.post(url, headers = headers, data = data)
         if r.status_code != requests.codes.ok:
             w2l.error('{0} url {1} return {2}  {3}'.format(type(self), url, r.status_code, date))
             return
@@ -260,7 +261,7 @@ class chunqiu_air(y_co_if.air_if):
         for item in tickets_info['PriceTrends']:
             if item['Price'] is not None and item['Price'] > 0:
                 #{'Date': '2019-04-27', 'DayOfWeek': '周六', 'Price': 2160, 'ActPrice': None, 'ActId': None}
-                print(item)
+                #print(item)
                 yield item
                 
     def _tickets(self, airport_from, airport_to):
@@ -272,6 +273,30 @@ class chunqiu_air(y_co_if.air_if):
         for tick in self._ticketsbydate((datetime.date.today() + datetime.timedelta(days=173)).strftime('%Y-%m-%d'), airport_from, airport_to):
             yield tick
 
+    def query_tickets(self, airport_from, airport_to):
+        for info in self._tickets(airport_from['code'], airport_to['code']):
+            for plane in self._get_air_plane(info['Date'], airport_from['code'], airport_to['code']):
+                if info['Price'] != plane['price']:
+                    w2l.debug('{}  from {} to {} date {} price {} {}'.format(type(self), airport_from['chs'], airport_to['chs'], info['Date'], info['Price'], plane['price']))
+                tick = {
+                    'from' : airport_from['chs'],
+                    'to' : airport_to['chs'],
+                    'date' : info['Date'].replace('-', ''),
+                    'week' : info['DayOfWeek'],
+                    #'price' : info['Price'],
+                    'price' : plane['price'],
+                    'airtype' : plane['airtype'],          # 飞机型号
+                    'flytime' : plane['flytime'],   # 飞行时间
+                    'flyno' : plane['flyno'],     # 航班号
+                    'departuretime' : plane['departuretime'],     # 登机时间(当地时间)
+                    'arrivaltime' : plane['arrivaltime'],     # 到达时间(当地时间)
+                    'refer' : self.name,  # 查询来源
+                    'url' : self.url,  # 查询网站
+                    'airline' : '春秋航空',  # 机票航空公司
+                }
+                #print('{} to {} at {},{}  price {}'.format(city1['chs'], city2['chs'], info['Date'], info['DayOfWeek'], info['Price']))
+                yield tick
+    '''
     def tickets(self, city_from, city_to):
         for city1 in self._get_airport(city_from):
             for city2 in self._get_airport(city_to):
@@ -297,6 +322,41 @@ class chunqiu_air(y_co_if.air_if):
                         }
                         #print('{} to {} at {},{}  price {}'.format(city1['chs'], city2['chs'], info['Date'], info['DayOfWeek'], info['Price']))
                         yield tick
+    '''
+    def tickets(self, city_from, city_to):
+        for airport1 in self._get_airport(city_from):
+            for airport2 in self._get_airport(city_to):
+                for tick in self.query_tickets(airport1, airport2):
+                    #print('{} to {} at {},{}  price {}'.format(city1['chs'], city2['chs'], info['Date'], info['DayOfWeek'], info['Price']))
+                    yield tick
+    
+    @staticmethod
+    def _thread_get_ticket(obj, city_from, city_to):
+        ticketlist = []
+        
+        for tick in obj.query_tickets(city_from, city_to):
+            ticketlist.append(tick)
+            
+        return ticketlist
+    
+    def _getticketsbythread(self, from_list, to_list):
+        '''多线程查询'''
+        ticketlist = []
+        if len(from_list) == 1:
+            for tick in self.query_tickets(from_list[0], to_list[0]):
+                ticketlist.append(tick)
+        else:
+            obj_list = []
+            for i in range(0, len(from_list)):
+                obj_list.append(self)
+
+            #tickets_result = self.executor.map(chunqiu_air._thread_get_ticket, obj_list, from_list, to_list)
+            tickets_result = y_co_if.air_if.executor.map(chunqiu_air._thread_get_ticket, obj_list, from_list, to_list)
+            for tickets in tickets_result:
+                for tick in tickets:
+                    ticketlist.append(tick)
+                    
+        return ticketlist
     
     def gettickets(self, city_from, city_to):
         from_list = []
@@ -306,13 +366,8 @@ class chunqiu_air(y_co_if.air_if):
             for city2 in self._get_airport(city_to):
                 from_list.append(city1)
                 to_list.append(city2)
-                
-        ticketlist = []
-
-        for ticket in self.tickets(city_from, city_to):
-            ticketlist.append(ticket)
             
-        return ticketlist
+        return self._getticketsbythread(from_list, to_list)
     
     def ticketsbydate(self, date, city_from, city_to):
         for city1 in self._get_airport(city_from):
@@ -341,22 +396,25 @@ class chunqiu_air(y_co_if.air_if):
                         print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(tick['from'], tick['to'], tick['date'], tick['week'], tick['price'], tick['airtype'], tick['flytime'], tick['flyno'], tick['departuretime'], tick['arrivaltime'], tick['refer'], tick['url'], tick['airline']))
                         #yield tick
                         return tick
-    
 
     def _test(self, city_from, city_to):
-        for ticket in self.tickets(city_from, city_to):
-            print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(ticket['from'], ticket['to'], ticket['date'], ticket['week'], ticket['price'], ticket['airtype'], ticket['flytime'], ticket['flyno'], ticket['departuretime'], ticket['arrivaltime'], ticket['refer'], ticket['url'], ticket['airline']))
+        #for ticket in self.tickets(city_from, city_to):
+        #    print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(ticket['from'], ticket['to'], ticket['date'], ticket['week'], ticket['price'], ticket['airtype'], ticket['flytime'], ticket['flyno'], ticket['departuretime'], ticket['arrivaltime'], ticket['refer'], ticket['url'], ticket['airline']))
+        
+        ticketlist = self.gettickets(city_from, city_to)
+        for ticket in ticketlist:
+            print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(ticket['from'], ticket['to'], ticket['date'], ticket['week'], ticket['price'], ticket['airtype'], ticket['flytime'], ticket['flyno'], ticket['departuretime'], ticket['arrivaltime'], ticket['refer'], ticket['url'], ticket['airline'])) 
 
     def test(self):
         #self._city_list()
         #self.show_city_list()
-        #self._test('上海', '东京')
-        #self._test('武汉', '东京')
-        #self._test('武汉', '大阪')
+        self._test('上海', '东京')
+        self._test('武汉', '东京')
+        self._test('武汉', '大阪')
         #self._test('武汉', '香港')
-        self.ticketsbydate('2019-04-30', '武汉', '大阪')
-        self.ticketsbydate('2019-05-05', '武汉', '东京')
-        self.ticketsbydate('2019-05-07', '武汉', '大阪')
+        #self.ticketsbydate('2019-04-30', '武汉', '大阪')
+        #self.ticketsbydate('2019-05-05', '武汉', '东京')
+        #self.ticketsbydate('2019-05-07', '武汉', '大阪')
         #self._get_air_plane('2019-04-27', '武汉', '东京(成田)')
         #self._get_query_param('2019-05-27', 'SHA', 'HND')
 

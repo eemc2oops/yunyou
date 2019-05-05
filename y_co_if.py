@@ -6,7 +6,8 @@ w2l = y_log.clog(__name__ == "__main__")
 
 class air_if(object):
     __metaclass__ = ABCMeta
-    executor = ThreadPoolExecutor(30)
+    executor4city = ThreadPoolExecutor(30)
+    executor4ticket = ThreadPoolExecutor(150)
 
     @abstractmethod
     def tickets(self, city_from, city_to):

@@ -48,7 +48,8 @@ def init_default_log(log):
 
 class clog(logging.Logger):
     '''日志记录类，对logging做简单的封装，日志默认路径在当前程序的log目录下'''
-    mailsended = False
+    #mailsended = False
+    mailsended = platform.system() != 'Linux'
     def __init__(self, 
                  initflag = False,
                  logname = os.path.split(os.path.splitext(sys.argv[0])[0])[-1],
@@ -100,17 +101,19 @@ class clog(logging.Logger):
         if clog.mailsended:
             return
         
-        sub = '票务运行错误 ' + time.strftime("%Y%m%d%H%M%S",time.localtime(time.time()))
-        if platform.system() == 'Linux':
+        #if platform.system() == 'Linux':
         #if platform.system() == 'Windows':
-            print(platform.system())
-            yemail = y_mail.y_status_email(sub)
-            content = msg + os.linesep + os.linesep + os.linesep
-            content = content + platform.system() + os.linesep
-            content = content + time.strftime("%Y-%m-%d %H:%M:%S %A(%w)",time.localtime(time.time())) + os.linesep
-            content = content + 'logfile : ' + os.path.abspath(self.logfile)
-            yemail.send_msg(content)
-            clog.mailsended = True
+        
+        clog.mailsended = True
+        
+        sub = '票务运行错误 ' + time.strftime("%Y%m%d%H%M%S",time.localtime(time.time()))
+        
+        yemail = y_mail.y_status_email(sub)
+        content = msg + os.linesep + os.linesep + os.linesep
+        content = content + platform.system() + os.linesep
+        content = content + time.strftime("%Y-%m-%d %H:%M:%S %A(%w)",time.localtime(time.time())) + os.linesep
+        content = content + 'logfile : ' + os.path.abspath(self.logfile)
+        yemail.send_msg(content)
 
     def critical(self, msg, *args, **kwargs):
         self.logger.critical(msg, *args, **kwargs)

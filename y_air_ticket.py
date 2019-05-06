@@ -51,16 +51,16 @@ class airticket:
 
     def test(self):
         #print(str(self.ch))
-        print('begin ', time.strftime("%H:%M:%S"))
-        for ticket in self.tickets('上海', '东京'):
-            #print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(ticket['from'], ticket['to'], ticket['date'], ticket['week'], ticket['price'], ticket['airtype'], ticket['flytime'], ticket['flyno'], ticket['departuretime'], ticket['arrivaltime'], ticket['refer'], ticket['url'], ticket['airline']))
-            pass
-        print('end ', time.strftime("%H:%M:%S"))
-        
         #print('begin ', time.strftime("%H:%M:%S"))
-        #for for ticket in self.tickets_by_thread('上海', '东京'):
+        #for ticket in self.tickets('上海', '东京'):
+            #print('from {} to {} at {},{} price {} type {} fly time {} no {} time {} - {} refer {} {} airline {}'.format(ticket['from'], ticket['to'], ticket['date'], ticket['week'], ticket['price'], ticket['airtype'], ticket['flytime'], ticket['flyno'], ticket['departuretime'], ticket['arrivaltime'], ticket['refer'], ticket['url'], ticket['airline']))
         #    pass
         #print('end ', time.strftime("%H:%M:%S"))
+        
+        print('begin ', time.strftime("%H:%M:%S"))
+        for ticket in self.tickets_by_thread('上海', '东京'):
+            pass
+        print('end ', time.strftime("%H:%M:%S"))
 
 def run_entry():
     w2l.info('{0} run.'.format(__name__))

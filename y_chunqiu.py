@@ -1,3 +1,4 @@
+import platform
 from urllib.parse import quote
 from urllib.parse import unquote
 from urllib.parse import urlencode
@@ -61,6 +62,13 @@ class chunqiu_air(y_co_if.air_if):
         self._get_city_list()
         self.name = '春秋官网'
         self.url = 'www.ch.com'
+        
+        if platform.system() == 'Linux':
+            self.executor4city = ThreadPoolExecutor(4)
+            self.executor4ticket = ThreadPoolExecutor(10)
+        else:
+            self.executor4city = ThreadPoolExecutor(4)
+            self.executor4ticket = ThreadPoolExecutor(30)
 
     def __str__(self):
         return self.name
@@ -172,10 +180,13 @@ class chunqiu_air(y_co_if.air_if):
         #print(plane_info['Route'][0][0]['Type'])
         
         if plane_info['Code'] != '0':
-            w2l.error('{0} url {1} return {2} {3} {4} {5}'.format(type(self), url, plane_info['Code'], airport_from, airport_to, date))
+            w2l.info('{0} url {1} return {2} {3} {4} {5}'.format(type(self), url, plane_info['Code'], airport_from, airport_to, date))
+            return
         
         if len(plane_info['Route']) == 0:
-            w2l.error('{0} url {1} empty msg {2} {3} {4}'.format(type(self), url, airport_from, airport_to, date))
+            # 说明票价信息可能有变化
+            w2l.info('{0} url {1} empty msg {2} {3} {4}'.format(type(self), url, airport_from, airport_to, date))
+            return
         
         for items in plane_info['Route']:
             for item in items:
@@ -327,7 +338,7 @@ class chunqiu_air(y_co_if.air_if):
             from_list.append(airport_from)
             to_list.append(airport_to)
             
-        planelist = y_co_if.air_if.executor4ticket.map(chunqiu_air.thread_get_airplane, obj_list, info_list, from_list, to_list)
+        planelist = self.executor4ticket.map(chunqiu_air.thread_get_airplane, obj_list, info_list, from_list, to_list)
             
         return planelist
     
@@ -355,7 +366,7 @@ class chunqiu_air(y_co_if.air_if):
                 ticketlist.append(tick)
         else:
             #tickets_result = self.executor.map(chunqiu_air._thread_get_ticket, obj_list, from_list, to_list)
-            tickets_result = y_co_if.air_if.executor4city.map(chunqiu_air._thread_get_ticket, obj_list, from_list, to_list)
+            tickets_result = self.executor4city.map(chunqiu_air._thread_get_ticket, obj_list, from_list, to_list)
             for tickets in tickets_result:
                 for tick in tickets:
                     ticketlist.append(tick)

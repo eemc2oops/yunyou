@@ -1,0 +1,2 @@
+﻿ui转py
+pyuic5 -o a.py a.ui    

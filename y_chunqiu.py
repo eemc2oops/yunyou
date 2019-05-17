@@ -62,7 +62,7 @@ class chunqiu_air(y_co_if.air_if):
         self._get_city_list()
         self.name = '春秋官网'
         self.url = 'www.ch.com'
-        
+
         if platform.system() == 'Linux':
             self.executor4city = ThreadPoolExecutor(4)
             self.executor4ticket = ThreadPoolExecutor(10)

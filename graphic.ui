@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>tickets_main_window</class>
+ <widget class="QMainWindow" name="tickets_main_window">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,51 +11,31 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>机票</string>
+   <string>票</string>
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>animal_panda.ico</normaloff>animal_panda.ico</iconset>
+    <normaloff>images/animal_bird_sc.ico</normaloff>images/animal_bird_sc.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTableWidget" name="air_tickets_table">
+   <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>190</y>
-      <width>681</width>
-      <height>281</height>
+      <x>0</x>
+      <y>259</y>
+      <width>801</width>
+      <height>261</height>
      </rect>
     </property>
-   </widget>
-   <widget class="QPushButton" name="guess_pushbutton">
-    <property name="geometry">
-     <rect>
-      <x>120</x>
-      <y>90</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>猜猜猜</string>
-    </property>
-    <property name="text">
-     <string>猜</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="input_lineEdit">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>50</y>
-      <width>211</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>输入猜的数字</string>
-    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QTableWidget" name="tickets_display_table">
+       <property name="gridStyle">
+        <enum>Qt::DotLine</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

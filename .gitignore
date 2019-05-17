@@ -3,3 +3,6 @@ __pycache__/
 project/
 .vscode/
 geckodriver.log
+.eric6project/
+__init__.py
+yunyou.e4p

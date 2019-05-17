@@ -28,7 +28,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="quit_push_button">
+   <widget class="QPushButton" name="guess_pushbutton">
     <property name="geometry">
      <rect>
       <x>120</x>
@@ -37,8 +37,24 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>猜猜猜</string>
+    </property>
     <property name="text">
-     <string>quit</string>
+     <string>猜</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="input_lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>50</y>
+      <width>211</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>输入猜的数字</string>
     </property>
    </widget>
   </widget>
@@ -55,22 +71,5 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>quit_push_button</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>143</x>
-     <y>123</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>353</x>
-     <y>168</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

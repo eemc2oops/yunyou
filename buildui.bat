@@ -1,0 +1,1 @@
+pyuic5 -o y_graphic.py graphic.ui

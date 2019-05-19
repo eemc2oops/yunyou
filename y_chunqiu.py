@@ -68,7 +68,7 @@ class chunqiu_air(y_co_if.air_if):
             self.executor4ticket = ThreadPoolExecutor(10)
         else:
             self.executor4city = ThreadPoolExecutor(4)
-            self.executor4ticket = ThreadPoolExecutor(30)
+            self.executor4ticket = ThreadPoolExecutor(15)
 
     def __str__(self):
         return self.name

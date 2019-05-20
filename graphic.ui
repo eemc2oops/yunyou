@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1184</width>
-    <height>911</height>
+    <width>1188</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,14 +18,39 @@
     <normaloff>images/animal_bird_sc.ico</normaloff>images/animal_bird_sc.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout"/>
+   <widget class="QTableWidget" name="tickets_display_table">
+    <property name="geometry">
+     <rect>
+      <x>35</x>
+      <y>220</y>
+      <width>1121</width>
+      <height>321</height>
+     </rect>
+    </property>
+    <property name="gridStyle">
+     <enum>Qt::DotLine</enum>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="query_button">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>170</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>查询</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1184</width>
+     <width>1188</width>
      <height>23</height>
     </rect>
    </property>

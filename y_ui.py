@@ -15,18 +15,98 @@ class tickets_ui(QMainWindow, Ui_tickets_main_window):
     def __init__(self, parent=None):
         super(tickets_ui, self).__init__(parent)
         self.setupUi()
+        self.count = 0
 
     def setupUi(self):
         '''初始化ui'''
         # 先初始化基类的ui
         super(tickets_ui, self).setupUi(self)
-        
         # 再创建自已的UI信息
+        # table行列定义
+        self.tickets_display_table.setRowCount(0)    # 行
+        self.tickets_display_table.setColumnCount(11)  # 列
+        self.tickets_display_table.setEditTriggers(QTableWidget.NoEditTriggers)  # 设置只读
+        self.tickets_display_table.setHorizontalHeaderLabels(['from', 'to', 'date', 'price', 'flyno', 'airtype', 'departuretime', 'arrivaltime', 'refer', 'url', 'airline'])  # 设置表头
+
+    def set_table_show(self, ticket):
+        '''表中插入票务信息'''
+        row_count = self.tickets_display_table.rowCount()
+        self.tickets_display_table.insertRow(row_count)
+        self.tickets_display_table.setItem(row_count, 0, QTableWidgetItem(ticket['from']))
+        self.tickets_display_table.setItem(row_count, 1, QTableWidgetItem(ticket['to']))
+        self.tickets_display_table.setItem(row_count, 2, QTableWidgetItem(ticket['date']))
+        self.tickets_display_table.setItem(row_count, 3, QTableWidgetItem('%d' % ticket['price']))
+        self.tickets_display_table.setItem(row_count, 4, QTableWidgetItem(ticket['flyno']))
+        self.tickets_display_table.setItem(row_count, 5, QTableWidgetItem(ticket['airtype']))
+        self.tickets_display_table.setItem(row_count, 6, QTableWidgetItem(ticket['departuretime']))
+        self.tickets_display_table.setItem(row_count, 7, QTableWidgetItem(ticket['arrivaltime']))
+        self.tickets_display_table.setItem(row_count, 8, QTableWidgetItem(ticket['refer']))
+        self.tickets_display_table.setItem(row_count, 9, QTableWidgetItem(ticket['url']))
+        self.tickets_display_table.setItem(row_count, 10, QTableWidgetItem(ticket['airline']))
+
+    def test_show_ticket1(self):
+        ticket = {
+            'from' : '武汉',
+            'to' : '上海',
+            'date' : '20200202',
+            'price' : 12345,
+            'airtype' : 'a330',
+            'flytime' : '1h5m',
+            'flyno' : 'h6576',
+            'departuretime' : '12:36',
+            'arrivaltime' : '17:12',
+            'refer' : 'chunqiu',
+            'url' : 'www.sina.com.cn',
+            'airline' : '春秋',
+        }
+        self.set_table_show(ticket)
+        ticket['price'] = 234566
+        self.set_table_show(ticket)
+        ticket['price'] = 345566
+        self.set_table_show(ticket)
+        
+    def test_show_ticket2(self):
+        ticket = {
+            'from' : '北京',
+            'to' : '成都',
+            'date' : '20200202',
+            'price' : 97856,
+            'airtype' : 'a330',
+            'flytime' : '1h5m',
+            'flyno' : 'c88573',
+            'departuretime' : '12:36',
+            'arrivaltime' : '17:12',
+            'refer' : 'chunqiu',
+            'url' : 'www.sina.com.cn',
+            'airline' : '春秋',
+        }
+        self.set_table_show(ticket)
+        ticket['price'] = 86754
+        self.set_table_show(ticket)
+        ticket['price'] = 642523
+        self.set_table_show(ticket)
+        ticket['price'] = 534421
+        self.set_table_show(ticket)
+        ticket['price'] = 4321
+        self.set_table_show(ticket)
 
     @pyqtSlot()
     def on_tickets_display_table_cellEntered(self, row, column):
         '''显示表格的click信号处理槽函数'''
         w2l.info('table clieck at {} {}'.format(row, column))
+
+    @pyqtSlot()
+    def on_query_button_clicked(self):
+        '''查询按钮'''
+        w2l.info('press button')
+        self.tickets_display_table.clearContents()
+        self.tickets_display_table.setRowCount(0)
+        if self.count == 0:
+            self.test_show_ticket2()
+        else:
+            self.test_show_ticket1()
+            
+        self.count = self.count + 1
         pass
 
 def test_designer():

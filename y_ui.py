@@ -89,6 +89,26 @@ class tickets_ui(QMainWindow, Ui_tickets_main_window):
         self.set_table_show(ticket)
         ticket['price'] = 4321
         self.set_table_show(ticket)
+        ticket['price'] = 12341
+        self.set_table_show(ticket)
+        ticket['price'] = 534435676
+        self.set_table_show(ticket)
+        ticket['price'] = 9345762
+        self.set_table_show(ticket)
+        ticket['price'] = 12957
+        self.set_table_show(ticket)
+        ticket['price'] = 53646
+        self.set_table_show(ticket)
+        ticket['price'] = 6543158
+        self.set_table_show(ticket)
+        ticket['price'] = 35679
+        self.set_table_show(ticket)
+        ticket['price'] = 97887456
+        self.set_table_show(ticket)
+        ticket['price'] = 1546
+        self.set_table_show(ticket)
+        ticket['price'] = 345646
+        self.set_table_show(ticket)
 
     @pyqtSlot()
     def on_tickets_display_table_cellEntered(self, row, column):
@@ -99,8 +119,21 @@ class tickets_ui(QMainWindow, Ui_tickets_main_window):
     def on_query_button_clicked(self):
         '''查询按钮'''
         w2l.info('press button')
+        # 点击查询，先清空显示列表
         self.tickets_display_table.clearContents()
         self.tickets_display_table.setRowCount(0)
+        # 获取对话框输入的地址
+        from_city = self.from_lineedit.text()
+        to_city = self.to_lineedit.text()
+        w2l.error('input  from \'%s\'   to \'%s\'  ' % (from_city, to_city))
+        if from_city == '' or to_city == '':
+            # 如果输入是空，则提示以后退出查询
+            #reply = QMessageBox.about(self, '提示', '请输入出发地和目的地', QMessageBox.Yes)
+            #if reply == QMessageBox.Yes:
+            #    return
+            QMessageBox.about(self, '提示', '请输入出发地和目的地')
+            return
+        
         if self.count == 0:
             self.test_show_ticket2()
         else:

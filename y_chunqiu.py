@@ -68,7 +68,7 @@ class chunqiu_air(y_co_if.air_if):
             self.executor4ticket = ThreadPoolExecutor(10)
         else:
             self.executor4city = ThreadPoolExecutor(4)
-            self.executor4ticket = ThreadPoolExecutor(15)
+            self.executor4ticket = ThreadPoolExecutor(1)
 
     def __str__(self):
         return self.name
@@ -125,7 +125,7 @@ class chunqiu_air(y_co_if.air_if):
         param = {}
         for item in hasvalue.items():
             param[item.attr('name')] = item.attr('value')
-            
+
         #print(param)
         
         return param
@@ -134,6 +134,7 @@ class chunqiu_air(y_co_if.air_if):
     def _get_air_plane(self, date, airport_from, airport_to):
         '''获取当日航班的详细信息'''
         param = self._get_query_param(date, airport_from, airport_to)
+        print(param)
         data = {
             'Active9s' : None,
             'IsJC' : 'false',
@@ -242,20 +243,6 @@ class chunqiu_air(y_co_if.air_if):
             'IsUM' : 'false',
             'Days' : days,
         }
-        data1 = {
-            'Currency' : 0,
-            'DepartureDate' : date,
-            'IsShowTaxprice' : 'true',
-            'Departure' : airport_from,
-            'Arrival' : airport_to,
-            'SType' : '10',
-            'IsIJFlight' : 'true',
-            'Days' : days,
-            'IfRet' : 'false',
-            'ActId' : 0,
-            'IsReturn' : 'false',
-            'IsUM' : 'false',
-        }
         
         url = 'https://flights.ch.com/Flights/MinPriceTrends'
 
@@ -263,14 +250,14 @@ class chunqiu_air(y_co_if.air_if):
             'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
         }
         
-        #print(unquote(url))
+        print(unquote(url))
         r = requests.post(url, headers = headers, data = data)
         if r.status_code != requests.codes.ok:
             w2l.error('{0} url {1} return {2}  {3}'.format(type(self), url, r.status_code, date))
             return
         #with open('file.txt', 'wt', encoding='utf-8') as f:
         #    f.write(r.text)
-        #print(r.text)
+        print(r.text)
 
         #{"PriceTrends":[{"Date":"2019-04-24","DayOfWeek":"周三","Price":null,"ActPrice":null,"ActId":null},{"Date":"2019-04-25","DayOfWeek":"周四","Price":null,"ActPrice":null,"ActId":null},{"Date":"2019-04-26","DayOfWeek":"周五","Price":null,"ActPrice":null,"ActId":null}],"IsInternational":true,"IsShowTaxprice":true,"Code":"0","ErrorMessage":null,"Key":null}
         tickets_info = json.loads(r.text)

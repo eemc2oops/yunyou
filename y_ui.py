@@ -1,5 +1,5 @@
 ﻿import y_log
-import y_air_ticket
+from y_air_ticket import airticket 
 
 w2l = y_log.clog(__name__ == "__main__")
 
@@ -15,7 +15,7 @@ class tickets_ui(QMainWindow, Ui_tickets_main_window):
     def __init__(self, parent=None):
         super(tickets_ui, self).__init__(parent)
         self.setupUi()
-        self.count = 0
+        self.air_ticket = airticket()
 
     def setupUi(self):
         '''初始化ui'''
@@ -125,7 +125,6 @@ class tickets_ui(QMainWindow, Ui_tickets_main_window):
         # 获取对话框输入的地址
         from_city = self.from_lineedit.text()
         to_city = self.to_lineedit.text()
-        w2l.error('input  from \'%s\'   to \'%s\'  ' % (from_city, to_city))
         if from_city == '' or to_city == '':
             # 如果输入是空，则提示以后退出查询
             #reply = QMessageBox.about(self, '提示', '请输入出发地和目的地', QMessageBox.Yes)
@@ -134,13 +133,10 @@ class tickets_ui(QMainWindow, Ui_tickets_main_window):
             QMessageBox.about(self, '提示', '请输入出发地和目的地')
             return
         
-        if self.count == 0:
-            self.test_show_ticket2()
-        else:
-            self.test_show_ticket1()
-            
-        self.count = self.count + 1
-        pass
+        w2l.info('begin query :  from \'%s\'   to \'%s\'  ' % (from_city, to_city))
+        
+        for ticket in self.air_ticket.tickets_by_thread(from_city, to_city):
+            self.set_table_show(ticket)
 
 def test_designer():
     app = QApplication(sys.argv)
